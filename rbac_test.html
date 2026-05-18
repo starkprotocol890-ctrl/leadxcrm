@@ -1,0 +1,359 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>LeadX CRM — RBAC Test Runner</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'Segoe UI', sans-serif; background: #0f172a; color: #e2e8f0; padding: 24px; }
+  h1 { font-size: 22px; font-weight: 700; color: #f8fafc; margin-bottom: 4px; }
+  .subtitle { font-size: 13px; color: #94a3b8; margin-bottom: 24px; }
+  #runBtn {
+    background: #2563eb; color: #fff; border: none; padding: 12px 28px;
+    border-radius: 8px; font-size: 14px; font-weight: 600; cursor: pointer;
+    margin-bottom: 24px; transition: background 0.2s;
+  }
+  #runBtn:hover { background: #1d4ed8; }
+  #runBtn:disabled { background: #475569; cursor: not-allowed; }
+  #status { font-size: 13px; color: #94a3b8; margin-bottom: 16px; min-height: 20px; }
+  #summary { display: flex; gap: 16px; margin-bottom: 24px; flex-wrap: wrap; }
+  .summary-card {
+    background: #1e293b; border-radius: 10px; padding: 14px 20px;
+    border: 1px solid #334155; min-width: 140px;
+  }
+  .summary-card .num { font-size: 28px; font-weight: 800; }
+  .summary-card .label { font-size: 12px; color: #94a3b8; margin-top: 2px; }
+  .num-pass { color: #10b981; }
+  .num-fail { color: #ef4444; }
+  .num-warn { color: #f59e0b; }
+  .num-total { color: #60a5fa; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  thead th {
+    background: #1e293b; padding: 10px 12px; text-align: left;
+    font-weight: 600; color: #94a3b8; border-bottom: 1px solid #334155;
+    position: sticky; top: 0; z-index: 2;
+  }
+  tbody tr { border-bottom: 1px solid #1e293b; transition: background 0.15s; }
+  tbody tr:hover { background: #1e293b88; }
+  td { padding: 9px 12px; vertical-align: middle; }
+  .user-col { display: flex; align-items: center; gap: 10px; }
+  .avatar {
+    width: 32px; height: 32px; border-radius: 50%; display: flex;
+    align-items: center; justify-content: center; font-size: 11px;
+    font-weight: 700; flex-shrink: 0; color: #fff;
+  }
+  .user-name { font-weight: 600; color: #f1f5f9; font-size: 12px; }
+  .user-email { font-size: 10px; color: #64748b; }
+  .level-badge {
+    display: inline-block; padding: 2px 8px; border-radius: 999px;
+    font-size: 10px; font-weight: 700; white-space: nowrap;
+  }
+  .l5 { background: #7c3aed22; color: #a78bfa; border: 1px solid #7c3aed44; }
+  .l4 { background: #2563eb22; color: #60a5fa; border: 1px solid #2563eb44; }
+  .l3 { background: #059669 22; color: #34d399; border: 1px solid #05966944; }
+  .l2 { background: #d97706 22; color: #fbbf24; border: 1px solid #d9770644; }
+  .l1 { background: #dc2626 22; color: #f87171; border: 1px solid #dc262644; }
+  .check { font-size: 14px; text-align: center; }
+  .pass { color: #10b981; }
+  .fail { color: #ef4444; }
+  .warn { color: #f59e0b; }
+  .na   { color: #475569; }
+  .row-pass { background: #10b98108 !important; }
+  .row-fail { background: #ef444408 !important; }
+  .row-warn { background: #f59e0b08 !important; }
+  #tableWrap { overflow-x: auto; border-radius: 12px; border: 1px solid #334155; }
+  .spinner {
+    display: inline-block; width: 14px; height: 14px; border: 2px solid #475569;
+    border-top-color: #60a5fa; border-radius: 50%; animation: spin 0.6s linear infinite;
+    vertical-align: middle; margin-right: 6px;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .section-row td { background: #162032; color: #475569; font-size: 10px; 
+    text-transform: uppercase; letter-spacing: 0.08em; padding: 6px 12px; }
+</style>
+</head>
+<body>
+
+<h1>🛡️ LeadX CRM — RBAC Test Runner</h1>
+<p class="subtitle">Automated permission verification for all employee profiles</p>
+
+<button id="runBtn" onclick="runTests()">▶ Run All RBAC Tests</button>
+<div id="status"></div>
+<div id="summary" style="display:none"></div>
+<div id="tableWrap" style="display:none">
+  <table>
+    <thead>
+      <tr>
+        <th style="min-width:200px">Employee</th>
+        <th>Level / Role</th>
+        <th>Designation</th>
+        <th title="Activity Logs visible (level >= 4)">📋 Logs</th>
+        <th title="Global notifications (CEO or Manager role)">🔔 Global Notifs</th>
+        <th title="Can add / manage employees (CEO only)">👥 Manage Employees</th>
+        <th title="Calendar access (not HR, not Videographer)">📅 Calendar</th>
+        <th title="Workload Planner access (level >= 3 OR HR)">📊 Workload</th>
+        <th title="Task Manager access (level >= 3, not HR)">✅ Task Mgr</th>
+        <th title="Monitoring access (level >= 3 OR HR)">👁 Monitor</th>
+        <th title="Can assign tasks to subordinates (hierarchy)">🔗 Assign Tasks</th>
+        <th title="Sees all tasks globally (CEO or Manager)">📋 All Tasks</th>
+        <th>Status</th>
+      </tr>
+    </thead>
+    <tbody id="tableBody"></tbody>
+  </table>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+<script>
+const SUPABASE_URL = "https://ogioncykqergwuwmhimb.supabase.co";
+const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9naW9uY3lrcWVyZ3d1d21oaW1iIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzYxNzkxMTYsImV4cCI6MjA5MTc1NTExNn0.KlaZmhczgQx3XFi0wt-JWEJH2aItc7CWM3-RoH7NsVA";
+const db = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+// ─── RBAC Logic (mirrored from store_v2.js + auth_v2.js) ─────────────────────
+function hasPermission(user, permKey) {
+  const role = (user.role || '').toLowerCase().trim();
+  const designation = (user.designation || '').toLowerCase().trim();
+  const level = user.hierarchy_level || 1;
+
+  if (level === 5 || role === 'ceo') return true;
+  if (level === 4 || role === 'manager') return true;
+
+  switch (permKey) {
+    case 'task_access':
+      return !designation.includes('hr');
+    case 'calendar_access':
+      return !designation.includes('hr') && !designation.includes('videographer');
+    case 'monitoring_access':
+      return level >= 3 || designation.includes('hr');
+    case 'task_manager_access':
+      return level >= 3 && !designation.includes('hr');
+    case 'cross_department_task_access':
+      return level >= 3 || designation.includes('hr');
+    case 'workload_visibility':
+      return level >= 3 || designation.includes('hr');
+    default:
+      return false;
+  }
+}
+
+function isCEO(user)     { return user.hierarchy_level === 5 || user.role === 'ceo'; }
+function isManager(user) { return user.hierarchy_level === 4 || user.role === 'manager'; }
+function isAdmin(user)   { return isCEO(user) || isManager(user); }
+
+function check(cond)     { return cond ? 'pass' : 'fail'; }
+
+function evalUser(user) {
+  const role  = (user.role || '').toLowerCase();
+  const desig = (user.designation || '').toLowerCase();
+  const level = user.hierarchy_level || 1;
+  const isHR  = desig.includes('hr');
+  const isVid = desig.includes('videographer');
+
+  return {
+    logs:            check(level >= 4),
+    globalNotifs:    check(role === 'ceo' || role === 'manager'),
+    manageEmployees: check(role === 'ceo'),
+    calendarAccess:  check(hasPermission(user, 'calendar_access')),
+    workloadAccess:  check(hasPermission(user, 'workload_visibility')),
+    taskMgrAccess:   check(hasPermission(user, 'task_manager_access')),
+    monitorAccess:   check(hasPermission(user, 'monitoring_access')),
+    assignTasks:     check(level >= 3),
+    allTasksView:    check(role === 'ceo' || role === 'manager'),
+  };
+}
+
+// Expected RBAC matrix per hierarchy level for validation
+function getExpected(user) {
+  const role  = (user.role || '').toLowerCase();
+  const desig = (user.designation || '').toLowerCase();
+  const level = user.hierarchy_level || 1;
+  const isHR  = desig.includes('hr');
+  const isVid = desig.includes('videographer');
+
+  if (level === 5) return { // CEO
+    logs: 'pass', globalNotifs: 'pass', manageEmployees: 'pass',
+    calendarAccess: 'pass', workloadAccess: 'pass', taskMgrAccess: 'pass',
+    monitorAccess: 'pass', assignTasks: 'pass', allTasksView: 'pass'
+  };
+  if (level === 4) return { // Manager
+    logs: 'pass', globalNotifs: 'pass', manageEmployees: 'fail',
+    calendarAccess: 'pass', workloadAccess: 'pass', taskMgrAccess: 'pass',
+    monitorAccess: 'pass', assignTasks: 'pass', allTasksView: 'pass'
+  };
+  if (level === 3) return { // Heads
+    logs: 'fail', globalNotifs: 'fail', manageEmployees: 'fail',
+    calendarAccess: isHR ? 'fail' : 'pass',
+    workloadAccess: 'pass',
+    taskMgrAccess:  isHR ? 'fail' : 'pass',
+    monitorAccess:  'pass',
+    assignTasks:    'pass',
+    allTasksView:   'fail'
+  };
+  if (level === 2) return { // Associates
+    logs: 'fail', globalNotifs: 'fail', manageEmployees: 'fail',
+    calendarAccess: (isHR || isVid) ? 'fail' : 'pass',
+    workloadAccess: isHR ? 'pass' : 'fail',
+    taskMgrAccess:  'fail',
+    monitorAccess:  isHR ? 'pass' : 'fail',
+    assignTasks:    'fail',
+    allTasksView:   'fail'
+  };
+  return { // Trainees (level 1)
+    logs: 'fail', globalNotifs: 'fail', manageEmployees: 'fail',
+    calendarAccess: (isHR || isVid) ? 'fail' : 'pass',
+    workloadAccess: isHR ? 'pass' : 'fail',
+    taskMgrAccess:  'fail',
+    monitorAccess:  isHR ? 'pass' : 'fail',
+    assignTasks:    'fail',
+    allTasksView:   'fail'
+  };
+}
+
+// ─── Colours ──────────────────────────────────────────────────────────────────
+const LEVEL_COLORS = {
+  5: ['#7c3aed', '#ede9fe'],
+  4: ['#1d4ed8', '#dbeafe'],
+  3: ['#047857', '#d1fae5'],
+  2: ['#b45309', '#fef3c7'],
+  1: ['#b91c1c', '#fee2e2'],
+};
+const LEVEL_LABELS = { 5:'CEO', 4:'Manager', 3:'Head / Lead', 2:'Associate', 1:'Trainee' };
+
+function avatarBg(level) { return (LEVEL_COLORS[level] || ['#475569'])[0]; }
+function icon(result, expected) {
+  if (result === expected) return `<span class="pass" title="PASS ✓">✅</span>`;
+  return `<span class="fail" title="FAIL — got '${result}', expected '${expected}'">❌</span>`;
+}
+function naIcon() { return `<span class="na">—</span>`; }
+
+// ─── Main ─────────────────────────────────────────────────────────────────────
+async function runTests() {
+  const btn    = document.getElementById('runBtn');
+  const status = document.getElementById('status');
+  const tbody  = document.getElementById('tableBody');
+  const sumDiv = document.getElementById('summary');
+  const wrap   = document.getElementById('tableWrap');
+
+  btn.disabled = true;
+  btn.innerHTML = '<span class="spinner"></span> Running…';
+  status.innerHTML = '<span class="spinner"></span> Fetching profiles from Supabase…';
+  tbody.innerHTML = '';
+  sumDiv.style.display = 'none';
+  wrap.style.display = 'none';
+
+  // Fetch all profiles
+  const { data: profiles, error } = await db.from('profiles').select('*').order('hierarchy_level', { ascending: false });
+  if (error) {
+    status.innerHTML = `❌ Failed to fetch profiles: ${error.message}`;
+    btn.disabled = false;
+    btn.textContent = '▶ Run All RBAC Tests';
+    return;
+  }
+
+  // Filter out super_admin
+  const users = profiles.filter(p => p.role !== 'super_admin');
+
+  let totalChecks = 0, passCount = 0, failCount = 0;
+  const rows = [];
+  let lastLevel = null;
+
+  for (const user of users) {
+    const level    = user.hierarchy_level || 1;
+    const result   = evalUser(user);
+    const expected = getExpected(user);
+
+    const keys = ['logs','globalNotifs','manageEmployees','calendarAccess',
+                  'workloadAccess','taskMgrAccess','monitorAccess','assignTasks','allTasksView'];
+
+    let rowPass = 0, rowFail = 0;
+    keys.forEach(k => {
+      totalChecks++;
+      if (result[k] === expected[k]) rowPass++;
+      else rowFail++;
+    });
+    passCount += rowPass;
+    failCount += rowFail;
+
+    const rowClass = rowFail > 0 ? 'row-fail' : 'row-pass';
+    const name = user.full_name || 'Unknown';
+    const initials = name.split(' ').map(n=>n[0]).join('').toUpperCase().substr(0,2);
+    const lclass = `l${level}`;
+    const bg = avatarBg(level);
+
+    // Section divider
+    let divider = '';
+    if (level !== lastLevel) {
+      divider = `<tr class="section-row"><td colspan="13">
+        Level ${level} — ${LEVEL_LABELS[level]}
+      </td></tr>`;
+      lastLevel = level;
+    }
+
+    const statusBadge = rowFail === 0
+      ? `<span style="color:#10b981;font-weight:700">✓ All Pass</span>`
+      : `<span style="color:#ef4444;font-weight:700">✗ ${rowFail} Fail${rowFail>1?'s':''}</span>`;
+
+    rows.push(`
+      ${divider}
+      <tr class="${rowClass}">
+        <td>
+          <div class="user-col">
+            <div class="avatar" style="background:${bg}">
+              ${initials}
+            </div>
+            <div>
+              <div class="user-name">${name}</div>
+              <div class="user-email">${user.email || '—'}</div>
+            </div>
+          </div>
+        </td>
+        <td><span class="level-badge ${lclass}">L${level} · ${user.role || '?'}</span></td>
+        <td style="font-size:11px;color:#94a3b8">${user.designation || '—'}</td>
+        <td class="check">${icon(result.logs,          expected.logs)}</td>
+        <td class="check">${icon(result.globalNotifs,  expected.globalNotifs)}</td>
+        <td class="check">${icon(result.manageEmployees, expected.manageEmployees)}</td>
+        <td class="check">${icon(result.calendarAccess, expected.calendarAccess)}</td>
+        <td class="check">${icon(result.workloadAccess, expected.workloadAccess)}</td>
+        <td class="check">${icon(result.taskMgrAccess,  expected.taskMgrAccess)}</td>
+        <td class="check">${icon(result.monitorAccess,  expected.monitorAccess)}</td>
+        <td class="check">${icon(result.assignTasks,    expected.assignTasks)}</td>
+        <td class="check">${icon(result.allTasksView,   expected.allTasksView)}</td>
+        <td>${statusBadge}</td>
+      </tr>
+    `);
+
+    status.innerHTML = `<span class="spinner"></span> Testing ${users.indexOf(user)+1}/${users.length}: ${name}…`;
+    await new Promise(r => setTimeout(r, 30));
+  }
+
+  tbody.innerHTML = rows.join('');
+  wrap.style.display = 'block';
+
+  const total = users.length;
+  const allPass = users.filter(u => {
+    const r = evalUser(u), e = getExpected(u);
+    return ['logs','globalNotifs','manageEmployees','calendarAccess',
+            'workloadAccess','taskMgrAccess','monitorAccess','assignTasks','allTasksView']
+      .every(k => r[k] === e[k]);
+  });
+
+  sumDiv.innerHTML = `
+    <div class="summary-card"><div class="num num-total">${total}</div><div class="label">Profiles Tested</div></div>
+    <div class="summary-card"><div class="num num-total">${totalChecks}</div><div class="label">Total Checks</div></div>
+    <div class="summary-card"><div class="num num-pass">${passCount}</div><div class="label">Passed</div></div>
+    <div class="summary-card"><div class="num num-fail">${failCount}</div><div class="label">Failed</div></div>
+    <div class="summary-card"><div class="num ${failCount===0?'num-pass':'num-fail'}">${failCount===0?'✓ PERFECT':'⚠ ISSUES'}</div><div class="label">Overall Result</div></div>
+  `;
+  sumDiv.style.display = 'flex';
+
+  status.innerHTML = failCount === 0
+    ? `✅ All ${totalChecks} RBAC checks passed across ${total} profiles.`
+    : `⚠️ ${failCount} checks failed out of ${totalChecks}. Review the red rows above.`;
+
+  btn.disabled = false;
+  btn.textContent = '↺ Re-run Tests';
+}
+</script>
+</body>
+</html>

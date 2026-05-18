@@ -1,0 +1,62 @@
+# Environment Files
+.env
+.env.local
+.env.*.local
+
+# Dependency Directories
+node_modules/
+jspm_packages/
+
+# Build/Dev Assets
+dist/
+build/
+.next/
+out/
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Editor/Agent Meta
+.agents/
+.claude/
+.gemini/
+.idea/
+.vscode/
+*.sublime-project
+*.sublime-workspace
+
+# OS Files
+.DS_Store
+Thumbs.db
+
+# Project Backups & Archives
+archive/
+backup_*/
+backup_diagnosed/
+scratch/
+PROJECT_REPORT.txt
+SPEC.md
+
+# Dev Utilities
+debug_env.html
+fix_leads.py
+test_imports.mjs
+mcp-config.json
+.geminiantigravitymcp_config.json
+start-mcp.ps1
+skills-lock.json
+dev_tools/
+emergency_backup/
+
+# General Sensitive Dumps
+*.sql
+*.json
+!package.json
+!package-lock.json
+!skills-lock.json
+
+# Local Demo
+kanban_demo/

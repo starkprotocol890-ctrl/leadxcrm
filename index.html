@@ -1,0 +1,1835 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>LEAD 360</title>
+  <link rel="icon"
+    href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>🚀</text></svg>">
+  <meta name="description" content="LEAD 360 — Full-featured Leads platform for digital marketing agencies">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script>console.log("HEAD SCRIPTS EXECUTING...");</script>
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script>console.log("SUPABASE CDN LOADED:", typeof supabase !== 'undefined');</script>
+  <link rel="stylesheet" href="leadx_v5.css?v=header_v2">
+  <script>console.log("INDEX.HTML VERSION: v5.1 (HEADER REFIX)");</script>
+</head>
+
+<body>
+
+  <!-- ===== HEADER ===== -->
+  <header class="header">
+    <div class="header-brand">
+      <div class="logo">LEAD</div>
+      <div class="logo-sub">360</div>
+    </div>
+    <div class="header-right">
+      <div class="header-date" id="headerDate"></div>
+
+      <!-- Notification Dropdown -->
+      <div class="notification-dropdown" id="notificationDropdown">
+        <button class="notification-trigger" onclick="window.notificationHandlers.toggleNotificationMenu(event)">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+          </svg>
+          <span class="notification-badge" id="notificationBadge" style="display: none;"></span>
+        </button>
+        <div class="notification-menu" id="notificationMenu">
+          <div class="notification-menu-header">
+            <span style="font-weight: 700; color: #0f172a; font-size: 14px;">Notifications</span>
+            <button onclick="window.notificationHandlers.markAllAsRead(event)" class="mark-all-read-btn">Mark all read</button>
+          </div>
+          <div class="notification-menu-body" id="notificationMenuBody">
+            <div class="notification-empty">No new notifications</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Logs Dropdown -->
+      <div class="notification-dropdown" id="logsDropdown">
+        <button class="notification-trigger" onclick="window.logHandlers.toggleLogsMenu(event)">
+          <!-- Logs/Notes Icon -->
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+            stroke-linecap="round" stroke-linejoin="round" style="color: #64748b;">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          <span class="notification-badge" id="logsBadge" style="display: none; background: #3b82f6;"></span>
+        </button>
+        <div class="notification-menu" id="logsMenu" style="width: 350px;">
+          <div class="notification-menu-header">
+            <span style="font-weight: 700; color: #0f172a; font-size: 14px;">Activity Logs</span>
+          </div>
+          <div class="notification-menu-body" id="logsMenuBody">
+            <div class="notification-empty">No recent activity logs</div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Profile Dropdown -->
+      <div class="profile-dropdown" id="profileDropdown">
+        <div class="profile-trigger" onclick="window.authHandlers.toggleProfileMenu(event)">
+          <div id="headerUserAvatar" class="header-avatar">?</div>
+          <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" style="color: #94a3b8; margin-left: 4px;">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        </div>
+        <div class="profile-menu" id="profileMenu">
+          <div class="profile-menu-header">
+            <div id="menuUserName" style="font-weight: 800; color: #0f172a; font-size: 14px;">User Name</div>
+            <div id="menuUserEmail" style="font-size: 12px; color: #64748b; margin-top: 2px;">user@example.com</div>
+          </div>
+          <div class="profile-menu-item"
+            onclick="window.authHandlers.populateProfileModal(); window.openModal('myProfileModal')">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            My Profile
+          </div>
+          <div class="profile-menu-item logout" onclick="window.handleLogout()">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+              stroke-linecap="round" stroke-linejoin="round" style="color: #ef4444;">
+              <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path>
+              <polyline points="16 17 21 12 16 7"></polyline>
+              <line x1="21" y1="12" x2="9" y2="12"></line>
+            </svg>
+            Logout
+          </div>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ===== NAVIGATION TABS ===== -->
+  <div class="nav-tabs-bar">
+    <button class="nav-tab active" id="tabLeads"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
+        <polyline points="17 6 23 6 23 12"></polyline>
+      </svg>Leads</button>
+    <button class="nav-tab" id="tabClients"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>Clients</button>
+    <button class="nav-tab" id="tabCalendar"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+        <line x1="16" y1="2" x2="16" y2="6"></line>
+        <line x1="8" y1="2" x2="8" y2="6"></line>
+        <line x1="3" y1="10" x2="21" y2="10"></line>
+      </svg>Calendar</button>
+    <button class="nav-tab" id="tabTasks"><svg width="18" height="18" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"></path>
+        <rect x="8" y="2" width="8" height="4" rx="1" ry="1"></rect>
+      </svg>Tasks</button>
+    <button class="nav-tab admin-only-feature" id="tabTaskManager"><svg width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        style="margin-right: 6px;">
+        <rect x="3" y="3" width="7" height="7"></rect>
+        <rect x="14" y="3" width="7" height="7"></rect>
+        <rect x="14" y="14" width="7" height="7"></rect>
+        <rect x="3" y="14" width="7" height="7"></rect>
+      </svg>Planner</button>
+    <button class="nav-tab admin-only-feature" id="tabEmployees"><svg width="18" height="18" viewBox="0 0 24 24"
+        fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        style="margin-right: 6px;">
+        <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
+        <circle cx="9" cy="7" r="4"></circle>
+        <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
+        <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+      </svg>Peoples</button>
+
+    <!-- More Tabs Dropdown (Reporter, Analytics, Chat) -->
+    <div class="nav-tabs-dropdown" id="moreTabsDropdown">
+      <button class="nav-tab-dropdown-trigger" id="moreTabsTrigger" onclick="window.uiHandlers.toggleMoreTabs(event)">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="1"></circle>
+          <circle cx="12" cy="5" r="1"></circle>
+          <circle cx="12" cy="19" r="1"></circle>
+        </svg>
+        More
+      </button>
+      <div class="nav-tabs-dropdown-menu" id="moreTabsMenu">
+        <button class="nav-tab dropdown-tab-item" id="tabReports">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+            <polyline points="14 2 14 8 20 8"></polyline>
+            <line x1="16" y1="13" x2="8" y2="13"></line>
+            <line x1="16" y1="17" x2="8" y2="17"></line>
+            <polyline points="10 9 9 9 8 9"></polyline>
+          </svg>
+          Reports
+        </button>
+        <button class="nav-tab dropdown-tab-item admin-only-feature" id="tabAnalytics">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+          </svg>
+          Analytics
+        </button>
+        <button class="nav-tab dropdown-tab-item" id="tabChat">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+          </svg>
+          Chat
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- LEADS VIEW (EXISTING - PRESERVED)            -->
+  <!-- ============================================ -->
+  <div id="leadsView" class="view-container">
+
+
+    <!-- ===== STATS BAR ===== -->
+    <div class="stats-bar" id="statsBar">
+      <div class="stat-card stat-total">
+        <span class="stat-label">Total</span>
+        <span class="stat-count" id="stat-total">0</span>
+      </div>
+      <div class="stat-card stat-new">
+        <span class="stat-label">New</span>
+        <span class="stat-count" id="stat-new">0</span>
+      </div>
+      <div class="stat-card stat-contacted">
+        <span class="stat-label">Contacted</span>
+        <span class="stat-count" id="stat-contacted">0</span>
+      </div>
+      <div class="stat-card stat-meeting">
+        <span class="stat-label">Meeting</span>
+        <span class="stat-count" id="stat-meeting">0</span>
+      </div>
+      <div class="stat-card stat-proposal">
+        <span class="stat-label">Proposal</span>
+        <span class="stat-count" id="stat-proposal">0</span>
+      </div>
+      <div class="stat-card stat-closed">
+        <span class="stat-label">Closed</span>
+        <span class="stat-count" id="stat-closed">0</span>
+      </div>
+    </div>
+
+    <!-- ===== MAIN CONTENT ===== -->
+    <div class="main-content">
+
+      <!-- LEFT: Add Lead Form -->
+      <div class="panel panel-form">
+        <h2 class="panel-title">Add New Lead</h2>
+        <form id="leadForm">
+          <div class="form-section-header">Primary Contact</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="name">Name <span class="required">*</span></label>
+              <input type="text" id="name" placeholder="e.g. Rahul Kumar" required>
+            </div>
+            <div class="form-group">
+              <label for="phone">Phone <span class="required">*</span></label>
+              <input type="text" id="phone" placeholder="e.g. 9876543210" required>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="email">Email</label>
+              <input type="email" id="email" placeholder="e.g. rahul@company.com">
+            </div>
+            <div class="form-group">
+              <label for="company">Company</label>
+              <input type="text" id="company" placeholder="e.g. TechCorp India">
+            </div>
+          </div>
+
+          <div class="form-section-header">Lead Details</div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="source">Source</label>
+              <select id="source">
+                <option value="">Select source</option>
+                <option value="Instagram">Instagram</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Referral">Referral</option>
+                <option value="Website">Website</option>
+                <option value="Walk-in">Walk-in</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="service">Service Interest</label>
+              <select id="service">
+                <option value="">Select service</option>
+                <option value="SEO">SEO</option>
+                <option value="Google Ads">Google Ads</option>
+                <option value="Meta Ads">Meta Ads</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Website">Website</option>
+                <option value="Content">Content</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="budget">Budget</label>
+              <input type="text" id="budget" placeholder="e.g. 50,000/month">
+            </div>
+            <div class="form-group" id="referralFieldGroup"
+              style="display: none; opacity: 0; transform: translateY(-10px); transition: all 0.3s ease;">
+              <label for="referral">Referral Name</label>
+              <input type="text" id="referral" placeholder="e.g. Referred by Priya">
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="status">Initial Status</label>
+              <select id="status">
+                <option value="new" selected>New</option>
+                <option value="contacted">Contacted</option>
+                <option value="meeting">Meeting</option>
+                <option value="proposal">Proposal</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-section-header">Additional Info</div>
+
+          <div class="form-group">
+            <label for="notes">Notes</label>
+            <textarea id="notes" rows="3" placeholder="Any initial notes about this lead..."></textarea>
+          </div>
+
+          <button type="submit" class="btn-primary" style="margin-top: 12px;">Add Lead</button>
+        </form>
+      </div>
+
+      <!-- RIGHT: Table Section -->
+      <div class="panel panel-table">
+
+        <!-- Unified CRM Toolbar -->
+        <div class="crm-toolbar">
+          <div class="crm-search-box">
+            <svg class="crm-search-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor"
+              stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+              <circle cx="11" cy="11" r="8"></circle>
+              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+            </svg>
+            <input type="text" id="searchInput" placeholder="Search by name, phone or company...">
+          </div>
+          <div class="crm-filters">
+            <select id="filterStatus">
+              <option value="">All Statuses</option>
+              <option value="new">New</option>
+              <option value="contacted">Contacted</option>
+              <option value="meeting">Meeting</option>
+              <option value="proposal">Proposal</option>
+              <option value="closed">Closed</option>
+            </select>
+          </div>
+        </div>
+
+        <!-- Leads Table -->
+        <div class="table-wrapper">
+          <table class="leads-table">
+            <thead>
+              <tr>
+                <th>Company / Lead</th>
+                <th>Phone</th>
+                <th>Contact Name</th>
+                <th>Source</th>
+                <th>Service</th>
+                <th>Budget</th>
+                <th>Status</th>
+                <th>Notes</th>
+                <th style="text-align: right;">Actions</th>
+              </tr>
+            </thead>
+            <tbody id="leadsTableBody">
+              <!-- Rows injected by JS -->
+            </tbody>
+          </table>
+          <div class="empty-state" id="leadsEmptyState">
+            <p>No leads yet. Add your first lead using the form.</p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div> <!-- end leadsView -->
+
+  <!-- ============================================ -->
+  <!-- CLIENTS VIEW — NEW                           -->
+  <!-- ============================================ -->
+  <style>
+    #clientsView .clients-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 24px;
+      padding: 4px;
+    }
+
+    #clientsView .client-card {
+      background: white;
+      border-radius: 16px;
+      padding: 24px;
+      border: 1px solid #e2e8f0;
+      cursor: pointer;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      display: flex;
+      flex-direction: column;
+      box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+      text-align: left;
+    }
+
+    #clientsView .client-card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+      border-color: #2563eb;
+    }
+
+    #clientsView .client-card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    #clientsView .client-card-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    #clientsView .client-info-item {
+      margin-bottom: 12px;
+      font-size: 14px;
+      color: #475569;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    #clientsView .client-info-item .label {
+      color: #94a3b8;
+      font-weight: 600;
+      font-size: 11px;
+      text-transform: uppercase;
+      min-width: 60px;
+    }
+
+    #clientsView .client-card-footer {
+      margin-top: auto;
+      padding-top: 20px;
+    }
+  </style>
+  <div id="clientsView" class="view-container" style="display: none; padding: 20px 24px;">
+    <div class="clients-header"
+      style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; gap: 16px; flex-wrap: wrap;">
+      <div>
+        <h2 style="font-size: 24px; font-weight: 700; color: #1e293b;">Client Management</h2>
+      </div>
+      <div class="search-box" style="max-width: 300px;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="clientSearchInput" placeholder="Search company or contact..." oninput="renderClients()">
+      </div>
+    </div>
+
+    <div id="clientsGrid" class="clients-grid">
+      <!-- Client cards injected by JS -->
+      <div class="empty-state show">
+        <p>No clients found. Close a lead to see them here.</p>
+      </div>
+    </div>
+  </div> <!-- end clientsView -->
+
+  <!-- ============================================ -->
+  <!-- CALENDAR PAGE SECTION — PREMIUM REFACTOR     -->
+  <!-- ============================================ -->
+  <div id="calendarPage" class="view-container" style="display: none;">
+    <!-- LEFT SIDEBAR: SMART FILTER PANEL -->
+    <aside class="calendar-sidebar">
+      <div class="sidebar-card">
+        <span class="filter-section-label">📌 Visibility</span>
+        <div class="switch-group">
+          <label class="switch-item">
+            <span>Tasks</span>
+            <div class="premium-switch">
+              <input type="checkbox" checked id="toggleTasks">
+              <span class="slider"></span>
+            </div>
+          </label>
+          <label class="switch-item">
+            <span>Deadlines</span>
+            <div class="premium-switch">
+              <input type="checkbox" checked id="toggleDeadlines">
+              <span class="slider"></span>
+            </div>
+          </label>
+
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+            <label
+              style="font-size: 11px; margin-bottom: 6px; display: block; color: #64748b; font-weight: 700; text-transform: uppercase;">Filter
+              Clients</label>
+            <div class="premium-select-wrapper">
+              <select id="clientFilter" class="premium-select">
+                <option value="all">All Clients Overview</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="sidebar-card">
+        <span class="filter-section-label">👤 Scope</span>
+        <div class="switch-group">
+          <label class="switch-item">
+            <span>My Tasks</span>
+            <div class="premium-switch">
+              <input type="checkbox" checked id="toggleMyTasks">
+              <span class="slider"></span>
+            </div>
+          </label>
+          <label class="switch-item">
+            <span>Team Tasks</span>
+            <div class="premium-switch">
+              <input type="checkbox" id="toggleTeamTasks">
+              <span class="slider"></span>
+            </div>
+          </label>
+
+          <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;">
+            <label
+              style="font-size: 11px; margin-bottom: 6px; display: block; color: #64748b; font-weight: 700; text-transform: uppercase;">Filter
+              Assignee</label>
+            <div class="premium-select-wrapper">
+              <select id="assigneeFilter" class="premium-select">
+                <option value="all">All Team Members</option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+    </aside>
+
+    <!-- MAIN CALENDAR AREA -->
+    <main class="calendar-main">
+      <header class="calendar-floating-header">
+        <div class="calendar-nav-group">
+          <h2 id="calendarHeaderText" class="calendar-title-text">May 2026</h2>
+        </div>
+
+        <div style="display: flex; gap: 20px; align-items: center;">
+          <div style="display: flex; gap: 8px; align-items: center;">
+            <button class="btn-nav-arrow" id="btnPrevMonth">&larr;</button>
+            <button class="btn-today" id="btnToday">Today</button>
+            <button class="btn-nav-arrow" id="btnNextMonth">&rarr;</button>
+          </div>
+
+          <div class="segmented-control">
+            <button class="segmented-btn active" id="viewMonth">Month</button>
+            <button class="segmented-btn" id="viewWeek">Week</button>
+          </div>
+        </div>
+      </header>
+
+      <div class="calendar-scroll" style="flex: 1; overflow-y: auto;">
+        <div id="calendarGrid" class="calendar-grid-system">
+          <!-- Generated by JS -->
+        </div>
+      </div>
+    </main>
+
+    <div id="calendarContainer" style="display: none;"></div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- TASKS VIEW — STRICT KANBAN BUILD            -->
+  <!-- ============================================ -->
+  <div id="tasksView" class="view-container tasks-view" style="display: none;">
+    <div class="tasks-page">
+      <div class="tasks-inner">
+        <!-- HEADER SECTION -->
+        <div class="tasks-header" id="tasksHeader" style="display: none;">
+          <div class="header-left">
+            <div id="workspaceTitle" class="workspace-title" style="display:none;"></div>
+            <div id="clientSelectHeaderContainer">
+              <!-- JS will move #clientSelect here when client is selected -->
+            </div>
+          </div>
+
+          <div class="header-right">
+            <button id="newTaskBtn" class="new-task-btn" style="display:none;">
+              + New Task
+            </button>
+          </div>
+        </div>
+
+        <!-- EMPTY STATE -->
+        <div id="emptyState" class="no-client">
+          <div class="empty-state-card">
+            <h2>No Client Selected</h2>
+            <p class="muted">Choose a client to start managing tasks and track execution progress.</p>
+            <div id="clientSelectEmptyContainer">
+              <select id="clientSelect">
+                <option value="">Select a client</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <!-- KANBAN BOARD -->
+        <div id="kanbanContainer" class="kanban-board" style="display:none;">
+          <!-- TODO -->
+          <div class="column kanban-column todo" ondragover="window.taskHandlers.onDragOver(event)"
+            ondragleave="window.taskHandlers.onDragLeave(event)" ondrop="window.taskHandlers.onDrop(event, 'todo')">
+            <div class="column-header">
+              <span class="column-title">TO DO</span>
+              <span class="task-count" id="todo-count">0</span>
+            </div>
+            <div id="todo" class="task-list"></div>
+          </div>
+
+          <!-- IN PROGRESS -->
+          <div class="column kanban-column in-progress" ondragover="window.taskHandlers.onDragOver(event)"
+            ondragleave="window.taskHandlers.onDragLeave(event)"
+            ondrop="window.taskHandlers.onDrop(event, 'in_progress')">
+            <div class="column-header">
+              <span class="column-title">IN PROGRESS</span>
+              <span class="task-count" id="progress-count">0</span>
+            </div>
+            <div id="inprogress" class="task-list"></div>
+          </div>
+
+          <!-- COMPLETED -->
+          <div class="column kanban-column completed" ondragover="window.taskHandlers.onDragOver(event)"
+            ondragleave="window.taskHandlers.onDragLeave(event)"
+            ondrop="window.taskHandlers.onDrop(event, 'completed')">
+            <div class="column-header">
+              <span class="column-title">COMPLETED</span>
+              <span class="task-count" id="completed-count">0</span>
+            </div>
+            <div id="completed" class="task-list"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- end tasksView -->
+
+
+
+
+  <!-- ============================================ -->
+  <!-- CHAT VIEW — NEW                              -->
+  <!-- ============================================ -->
+  <div id="chatView" class="view-container" style="display: none;">
+    <div class="chat-layout">
+      <!-- Left: Sidebar with DM / Groups tabs -->
+      <div class="chat-sidebar">
+        <div class="chat-sidebar-header">
+          <h3>Messages</h3>
+          <div style="display: flex; gap: 6px; margin-top: 8px;">
+            <button id="chatTabDM" class="chat-tab active" onclick="switchChatTab('dm')">Direct</button>
+            <button id="chatTabGroups" class="chat-tab" onclick="switchChatTab('groups')">Groups</button>
+          </div>
+          <input type="text" id="chatSearchInput" placeholder="Search..." style="margin-top: 8px;">
+        </div>
+
+        <!-- DM list -->
+        <div id="dmConversationList" class="chat-conversation-list">
+          <div class="chat-empty-state">
+            <p>Loading contacts...</p>
+          </div>
+        </div>
+
+        <!-- Group list -->
+        <div id="groupConversationList" class="chat-conversation-list" style="display: none;">
+          <div style="padding: 10px;">
+            <button class="btn-primary" style="width: 100%; margin-top: 0; font-size: 12px; padding: 8px;"
+              onclick="openCreateGroupModal()">+ Create Group</button>
+          </div>
+          <div id="groupListContainer">
+            <div class="chat-empty-state">
+              <p>No groups yet</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Right: Chat Area -->
+      <div class="chat-main">
+        <div class="chat-header" id="chatHeader">
+          <div class="chat-header-user">
+            <span class="chat-header-name" id="chatHeaderName">Select a conversation</span>
+            <div class="chat-header-status" id="chatHeaderStatus" style="display: none;">Online</div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="chat-placeholder">
+            <div class="chat-placeholder-icon">💬</div>
+            <h3>Your Messages</h3>
+            <p>Select a conversation from the sidebar to start<br>chatting with your team members.</p>
+          </div>
+        </div>
+
+        <div class="chat-input-bar" id="chatInputBar"
+          style="display: none; flex-direction: column; gap: 8px; padding: 12px 16px; border-top: 1px solid #e2e8f0; background: #fff;">
+          <div id="mentionSuggestions"
+            style="display: none; background: white; border: 1px solid #e2e8f0; border-radius: 8px; padding: 4px; margin-bottom: 4px; max-height: 140px; overflow-y: auto; box-shadow: 0 4px 12px rgba(0,0,0,0.1);">
+            <!-- populated by JS -->
+          </div>
+          <div style="display: flex; gap: 12px; width: 100%; align-items: center;">
+            <div style="position: relative;">
+              <label for="chatFileInput" class="btn-ghost" title="Attach File"
+                style="padding: 8px; border-radius: 6px; cursor: pointer; display: flex; align-items: center; justify-content: center; background: #f8fafc;">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <path
+                    d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48">
+                  </path>
+                </svg>
+              </label>
+              <input type="file" id="chatFileInput" style="display: none;">
+            </div>
+            <input type="text" id="chatMessageInput" placeholder="Write something... (use @ for mentions)"
+              style="flex: 1; border: 1px solid #e2e8f0; border-radius: 8px; padding: 10px 14px; font-size: 14px; outline: none; transition: border-color 0.2s;">
+            <button class="chat-send-btn" id="btnSendMessage" title="Send Message"
+              style="background: #2563eb; color: white; border: none; padding: 10px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; transition: background 0.2s;">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <line x1="22" y1="2" x2="11" y2="13"></line>
+                <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+              </svg>
+            </button>
+          </div>
+          <div id="fileUploadPreview" style="display: none; font-size: 11px; color: #64748b; margin-top: 4px;">
+            Selected: <span id="fileNameDisplay"></span>
+            <button class="btn-ghost" id="btnClearFile"
+              style="padding: 2px 4px; color: #ef4444; font-size: 11px;">(Remove)</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> <!-- end chatView -->
+
+  <!-- ============================================ -->
+  <!-- REPORTS VIEW — NEW                           -->
+  <!-- ============================================ -->
+  <div id="reportsView" class="view-container" style="display: none; padding: 20px 24px;">
+    <div class="reports-header">
+      <h2>Reports & Approvals</h2>
+      <button class="btn-primary" id="btnNewReport" style="width: auto; margin-top: 0;">+ New Report</button>
+    </div>
+
+    <!-- Filters -->
+    <div class="reports-filter-bar">
+      <select id="reportTypeFilter">
+        <option value="">All Types</option>
+        <option value="social_media_plan">Social Media Plan</option>
+        <option value="monthly_report">Monthly Report</option>
+        <option value="campaign_plan">Campaign Plan</option>
+      </select>
+      <select id="reportStatusFilter">
+        <option value="">All Statuses</option>
+        <option value="draft">Draft</option>
+        <option value="submitted">Submitted</option>
+        <option value="level1_approved">L1 Approved</option>
+        <option value="level2_approved">L2 Approved</option>
+        <option value="approved">Approved</option>
+        <option value="rejected">Rejected</option>
+        <option value="changes_requested">Changes Requested</option>
+      </select>
+      <div class="search-box" style="flex: 1;">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="reportClientFilter" placeholder="Filter by client...">
+      </div>
+    </div>
+
+    <!-- Reports Grid -->
+    <div class="reports-grid" id="reportsGrid">
+      <div class="empty-state show">
+        <p>No reports yet. Create your first report.</p>
+      </div>
+    </div>
+  </div> <!-- end reportsView -->
+
+  <!-- ============================================ -->
+  <!-- TASK MANAGER VIEW — NEW                      -->
+  <!-- ============================================ -->
+  <div id="taskManagerView" class="view-container"
+    style="display: none; padding: 0; height: 100vh; flex-direction: column;">
+    <!-- Filter Bar -->
+    <header class="planner-header">
+      <div class="planner-title">
+        <h2>Associate Work Planner</h2>
+        <span id="currentPlannerDateLabel">Loading...</span>
+      </div>
+      <div class="planner-controls">
+        <div class="planner-control-item">
+          <label>View Mode</label>
+          <select id="plannerViewMode">
+            <option value="daily">Daily View</option>
+            <option value="weekly">Weekly View</option>
+            <option value="monthly" selected>Monthly Analysis</option>
+          </select>
+        </div>
+        <div class="planner-control-item">
+          <label id="plannerDateLabel">Date</label>
+          <input type="date" id="plannerDateInput">
+          <select id="plannerMonthSelect" style="display: none;">
+            <option value="0">January</option>
+            <option value="1">February</option>
+            <option value="2">March</option>
+            <option value="3">April</option>
+            <option value="4">May</option>
+            <option value="5">June</option>
+            <option value="6">July</option>
+            <option value="7">August</option>
+            <option value="8">September</option>
+            <option value="9">October</option>
+            <option value="10">November</option>
+            <option value="11">December</option>
+          </select>
+        </div>
+        <div class="planner-control-item">
+          <label>Department</label>
+          <select id="plannerDepartmentFilter">
+            <option value="all">All Departments</option>
+          </select>
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Workspace -->
+    <main class="planner-main">
+      <!-- Left Panel: Employee List -->
+      <aside class="planner-sidebar">
+        <div class="sidebar-header">
+          <div style="display: flex; align-items: center; gap: 8px;">
+            <h3>Employees</h3>
+            <span id="plannerEmployeeCount">0</span>
+          </div>
+          <select id="plannerSortBy" class="planner-sort-select" onchange="window.renderEmployeeList()">
+            <option value="name">Name (A-Z)</option>
+            <option value="tasks_desc" selected>Workload (High)</option>
+            <option value="tasks_asc">Workload (Low)</option>
+          </select>
+        </div>
+        <div id="plannerEmployeeList" class="planner-list">
+          <!-- Employees injected here -->
+        </div>
+      </aside>
+
+      <!-- Right Panel: Task Details -->
+      <section class="planner-content">
+        <div id="plannerTaskHeader" class="content-header" style="display: none;">
+          <div class="employee-meta">
+            <div class="employee-avatar" id="activeEmployeeAvatar">?</div>
+            <div>
+              <h3 id="activeEmployeeName">Select an associate</h3>
+              <p id="activeEmployeeRole">To view their daily workload</p>
+            </div>
+          </div>
+          <div class="workload-stats">
+            <span class="stat-pill" id="statTotalTasks">0 Tasks</span>
+          </div>
+        </div>
+
+        <div id="plannerTaskList" class="task-detail-list">
+          <!-- Initial empty state -->
+          <div class="planner-empty-state">
+            <div class="empty-icon">📅</div>
+            <p id="plannerEmptyText">Select an associate from the left to view their scheduled tasks for this date.</p>
+          </div>
+        </div>
+      </section>
+    </main>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- EMPLOYEES VIEW — NEW                         -->
+  <div id="employeesView" class="view-container" style="display: none; padding: 0;">
+    <div class="people-container">
+      <div class="people-header">
+        <div>
+          <h2 style="font-size: 24px; font-weight: 800; color: #0f172a; margin: 0;">Peoples Management</h2>
+          <p style="font-size: 14px; color: #64748b; margin-top: 4px;">Manage organization roles, departments, and
+            access levels.</p>
+        </div>
+        <div class="people-actions">
+          <div class="mgmt-search-box">
+            <input type="text" id="employeeSearchInput" placeholder="Search team member..."
+              onkeyup="window.employeeHandlers.filterTable()">
+          </div>
+          <button class="btn-primary" onclick="window.employeeHandlers.openAddModal()"
+            style="margin: 0; height: 38px; padding: 0 20px; font-weight: 700;">+ Add Associate</button>
+        </div>
+      </div>
+
+      <div class="filter-bar">
+        <select id="filterRoleSelect" onchange="window.employeeHandlers.filterTable()">
+          <option value="all">All Roles</option>
+          <option value="ceo">CEO</option>
+          <option value="manager">Manager</option>
+          <option value="associate">Associate</option>
+        </select>
+        <select id="filterDeptSelect" onchange="window.employeeHandlers.filterTable()">
+          <option value="all">All Departments</option>
+        </select>
+      </div>
+
+      <table class="people-table">
+        <thead>
+          <tr>
+            <th style="width: 30%;">Name</th>
+            <th style="width: 15%;">Role</th>
+            <th style="width: 15%;">Department</th>
+            <th style="width: 20%;">Designation</th>
+            <th style="width: 15%;">Status</th>
+            <th class="actions-cell" style="width: 5%;"></th>
+          </tr>
+        </thead>
+        <tbody id="employeesTableBody">
+          <!-- JS will inject rows here -->
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+
+  <!-- MODAL: MY PROFILE -->
+  <div class="modal-overlay" id="myProfileModal">
+    <div class="modal-box" style="width: 400px;">
+      <div class="modal-header">
+        <h3>My Profile</h3>
+        <button class="modal-close" onclick="closeModal('myProfileModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="padding: 24px;">
+        <div style="text-align: center; margin-bottom: 24px;">
+          <div id="profileAvatarLarge"
+            style="width: 80px; height: 80px; background: #f8fafc; border-radius: 24px; margin: 0 auto 12px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 800; color: #475569; border: 1px solid #e2e8f0; box-shadow: var(--shadow-sm);">
+            ?</div>
+          <h4 id="profileNameDisplay" style="margin: 0; font-size: 18px; color: #0f172a; font-weight: 800;">Loading...
+          </h4>
+          <p id="profileRoleDisplay"
+            style="margin: 4px 0 0; font-size: 13px; color: #64748b; font-weight: 600; text-transform: uppercase; letter-spacing: 0.05em;">
+            Loading...</p>
+        </div>
+
+        <hr style="border: 0; border-top: 1px solid #f1f5f9; margin: 24px 0;">
+
+        <form id="changePasswordForm" onsubmit="window.authHandlers.updatePassword(event)">
+          <h5
+            style="margin: 0 0 16px; font-size: 14px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 0.05em;">
+            Change Password</h5>
+          <div class="form-group">
+            <label style="font-weight: 600;">Current Password</label>
+            <input type="password" name="old_password" required placeholder="Enter current password"
+              style="height: 42px;">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 600;">New Password</label>
+            <input type="password" name="new_password" required minlength="6" placeholder="Minimum 6 characters"
+              style="height: 42px;">
+          </div>
+          <div class="form-group">
+            <label style="font-weight: 600;">Confirm New Password</label>
+            <input type="password" name="confirm_password" required minlength="6"
+              placeholder="Confirm your new password" style="height: 42px;">
+          </div>
+          <button type="submit" class="btn-primary"
+            style="width: 100%; margin-top: 16px; height: 42px; font-weight: 700;">Update Secure Password</button>
+        </form>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- ANALYTICS VIEW — NEW                         -->
+  <!-- ============================================ -->
+  <div id="analyticsView" class="view-container" style="display: none; padding: 20px 24px;">
+    <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; border: 1px solid #e2e8f0;">
+      <h2 style="color: #1e293b; margin-bottom: 8px;">Analytics Dashboard</h2>
+      <p style="color: #64748b;">This feature is currently being restored. Please use the Leads and Clients tabs.</p>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- CHAT VIEW — SKELETON                         -->
+  <!-- ============================================ -->
+
+  <!-- ============================================ -->
+  <!-- TASK MODAL — ENHANCED                        -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="taskModal">
+    <div class="modal-box" style="width: 560px;">
+      <div class="modal-header">
+        <h3 id="taskModalHeader">Create New Task</h3>
+        <button class="modal-close" id="modalCloseTask" onclick="closeModal('taskModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <form id="taskForm">
+          <input type="hidden" id="taskId">
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="taskTitle">Title <span class="required">*</span></label>
+            <input type="text" id="taskTitle" placeholder="What needs to be done?" required>
+          </div>
+
+          <div class="form-group" style="margin-bottom: 16px;">
+            <label for="taskDesc">Description</label>
+            <textarea id="taskDesc" placeholder="Provide more details about this task..." rows="3"></textarea>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskType">Task Type <span class="required">*</span></label>
+              <select id="taskType" required>
+                <option value="">-- Select Type --</option>
+                <option value="Reel Video Creation">Reel Video Creation</option>
+                <option value="Reel Video Edit">Reel Video Edit</option>
+                <option value="Creative Design">Creative Design</option>
+                <option value="Creative Design Edit">Creative Design Edit</option>
+                <option value="Reel Video Script">Reel Video Script</option>
+                <option value="2D Video Creation">2D Video Creation</option>
+                <option value="Content Creation">Content Creation</option>
+                <option value="AI Video Creation">AI Video Creation</option>
+                <option value="Ideation">Ideation</option>
+                <option value="Research and Developing">Research and Developing</option>
+                <option value="Client Meeting">Client Meeting</option>
+                <option value="SMM Calendar Creation">SMM Calendar Creation</option>
+                <option value="Logo Creation">Logo Creation</option>
+                <option value="Branding Activities">Branding Activities</option>
+                <option value="Coordination">Coordination</option>
+                <option value="Planning">Planning</option>
+                <option value="Internal Meeting">Internal Meeting</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="taskStatus">Status</label>
+              <select id="taskStatus">
+                <option value="todo">To Do</option>
+                <option value="in_progress">In Progress</option>
+                <option value="completed">Completed</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskDueDate">Due Date <span class="required">*</span></label>
+              <input type="date" id="taskDueDate" required>
+            </div>
+            <div class="form-group">
+              <label for="taskPriority">Priority</label>
+              <select id="taskPriority">
+                <option value="medium">Medium</option>
+                <option value="low">Low</option>
+                <option value="high">High</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label for="taskAssignedTo">Associate</label>
+              <select id="taskAssignedTo">
+                <option value="">-- Unassigned --</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group" id="taskModalClientGroup">
+              <label for="taskClient">Client <span class="required">*</span></label>
+              <select id="taskClient">
+                <option value="">-- Select Client --</option>
+              </select>
+            </div>
+          </div>
+
+
+          <div id="subtasksSection" style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #e2e8f0;">
+            <h4 style="margin-bottom: 10px; font-size: 14px;">Subtasks</h4>
+            <div id="subtasksList" style="margin-bottom: 10px;"></div>
+            <div style="display: flex; gap: 8px;">
+              <input type="text" id="newSubtaskTitle" placeholder="Add subtask..."
+                style="flex: 1; padding: 6px; font-size: 13px;">
+              <button type="button" class="btn-ghost" id="btnAddSubtask"
+                style="padding: 6px 12px; font-size: 13px;">Add</button>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer" style="display: flex; justify-content: space-between; align-items: center;">
+        <button class="btn-danger" id="modalDeleteTask" style="display: none; margin-top: 0; width: auto;">Delete
+          Task</button>
+        <div style="display: flex; gap: 8px;">
+          <button class="btn-ghost" id="modalCancelTask" onclick="closeModal('taskModal')">Cancel</button>
+          <button class="btn-primary" id="modalSaveTask" form="taskForm" style="margin-top: 0; width: auto;">Save
+            Task</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- EDIT LEAD MODAL (EXISTING - PRESERVED)       -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="editLeadModal">
+    <div class="modal-box" style="width: 500px;">
+      <div class="modal-header">
+        <h3 id="modalEditLeadTitle">Edit Lead</h3>
+        <button class="modal-close" onclick="closeModal('editLeadModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <form id="editLeadForm">
+          <input type="hidden" id="editLeadId">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editName">Name <span class="required">*</span></label>
+              <input type="text" id="editName" required>
+            </div>
+            <div class="form-group">
+              <label for="editPhone">Phone <span class="required">*</span></label>
+              <input type="text" id="editPhone" required>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editEmail">Email</label>
+              <input type="email" id="editEmail">
+            </div>
+            <div class="form-group">
+              <label for="editCompany">Company</label>
+              <input type="text" id="editCompany">
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editSource">Source</label>
+              <select id="editSource">
+                <option value="">Select source</option>
+                <option value="Instagram">Instagram</option>
+                <option value="WhatsApp">WhatsApp</option>
+                <option value="Referral">Referral</option>
+                <option value="Website">Website</option>
+                <option value="Walk-in">Walk-in</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="editService">Service Interest</label>
+              <select id="editService">
+                <option value="">Select service</option>
+                <option value="SEO">SEO</option>
+                <option value="Google Ads">Google Ads</option>
+                <option value="Meta Ads">Meta Ads</option>
+                <option value="Social Media">Social Media</option>
+                <option value="Website">Website</option>
+                <option value="Content">Content</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-row">
+            <div class="form-group">
+              <label for="editBudget">Budget</label>
+              <input type="text" id="editBudget">
+            </div>
+            <div class="form-group">
+              <label for="editStatus">Status</label>
+              <select id="editStatus">
+                <option value="new">New</option>
+                <option value="contacted">Contacted</option>
+                <option value="meeting">Meeting</option>
+                <option value="proposal">Proposal</option>
+                <option value="closed">Closed</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="editNotes">Notes</label>
+            <textarea id="editNotes" rows="3" placeholder="Lead notes..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" onclick="closeModal('editLeadModal')">Cancel</button>
+        <button type="submit" class="btn-primary" id="modalSaveEditLead" form="editLeadForm"
+          style="margin-top: 0; width: auto;">Save Changes</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== NOTES MODAL (ENHANCED) ===== -->
+  <div class="modal-overlay" id="notesModal">
+    <div class="modal-box" style="width: 480px;">
+      <div class="modal-header">
+        <h3 id="modalLeadName">Lead Notes</h3>
+        <button class="modal-close" onclick="closeModal('notesModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div id="notesDisplayArea" class="notes-display-area"></div>
+
+        <label class="notes-input-label">Add New Note</label>
+        <textarea id="modalNotesText" rows="4" placeholder="Type your update here..."></textarea>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('notesModal')">Close</button>
+        <button class="btn-primary" id="modalSave" style="width: auto; margin-top: 0;">Add Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- REPORT MODAL — NEW (Create / Edit)           -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="reportModal">
+    <div class="modal-box" style="width: 560px;">
+      <div class="modal-header">
+        <h3 id="reportModalHeader">Create New Report</h3>
+        <button class="modal-close" onclick="closeModal('reportModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <form id="reportForm">
+          <input type="hidden" id="editReportId">
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="reportTitle">Title <span class="required">*</span></label>
+            <input type="text" id="reportTitle" placeholder="e.g. April Social Media Plan — ClientX" required>
+          </div>
+          <div class="form-row">
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="reportType">Type <span class="required">*</span></label>
+              <select id="reportType" required>
+                <option value="">Select type</option>
+                <option value="social_media_plan">Social Media Plan</option>
+                <option value="monthly_report">Monthly Report</option>
+                <option value="campaign_plan">Campaign Plan</option>
+              </select>
+            </div>
+            <div class="form-group" style="margin-bottom: 12px;">
+              <label for="reportClientName">Client Name</label>
+              <input type="text" id="reportClientName" placeholder="e.g. TechCorp India">
+            </div>
+          </div>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="reportContent">Content / Details</label>
+            <textarea id="reportContent" rows="8"
+              placeholder="Write the report content, plan details, or campaign brief..."></textarea>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" onclick="closeModal('reportModal')">Cancel</button>
+        <button class="btn-ghost" id="modalSaveDraft" style="border-color: #f59e0b; color: #d97706;">Save as
+          Draft</button>
+        <button class="btn-primary" id="modalSubmitReport" form="reportForm" style="margin-top: 0; width: auto;">Submit
+          for Approval</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- REPORT DETAIL MODAL — NEW                    -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="reportDetailModal">
+    <div class="modal-box" style="width: 640px;">
+      <div class="modal-header">
+        <h3 id="reportDetailTitle">Report Details</h3>
+        <button class="modal-close" onclick="closeModal('reportDetailModal')">&times;</button>
+      </div>
+      <div class="modal-body" style="overflow-y: auto;">
+        <div id="reportDetailContent">
+          <!-- Rendered by JS -->
+        </div>
+
+        <!-- Approval Chain -->
+        <div id="reportApprovalChain" class="approval-chain-section">
+          <h4>Approval History</h4>
+          <div id="approvalChainList">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <!-- Approval Actions (for approvers) -->
+        <div id="reportApprovalActions" class="approval-actions" style="display: none;">
+          <h4>Your Action</h4>
+          <div class="form-group" style="margin-bottom: 12px;">
+            <label for="approvalComments">Comments</label>
+            <textarea id="approvalComments" rows="3" placeholder="Add feedback or comments..."></textarea>
+          </div>
+          <div style="display: flex; gap: 8px;">
+            <button class="btn-primary" id="btnApproveReport" style="width: auto; margin-top: 0; background: #10b981;">✓
+              Approve</button>
+            <button class="btn-primary" id="btnRejectReport" style="width: auto; margin-top: 0; background: #ef4444;">✗
+              Reject</button>
+            <button class="btn-ghost" id="btnRequestChanges" style="border-color: #f59e0b; color: #d97706;">↺ Request
+              Changes</button>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('reportDetailModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Quick Assign modal removed as part of dashboard refactoring -->
+
+  <!-- ============================================ -->
+  <!-- CREATE GROUP MODAL — CHAT                    -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="createGroupModal">
+    <div class="modal-box" style="width: 460px;">
+      <div class="modal-header">
+        <h3>Create Group</h3>
+        <button class="modal-close" onclick="closeCreateGroupModal()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label for="groupName">Group Name <span class="required">*</span></label>
+          <input type="text" id="groupName" placeholder="e.g. Design Team">
+        </div>
+        <div class="form-group">
+          <label>Add Members</label>
+          <div id="groupMembersList" class="member-list">
+            <div class="member-list-empty">No members available</div>
+          </div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeCreateGroupModal()">Cancel</button>
+        <button class="btn-primary" style="margin-top: 0; width: auto;" onclick="createGroup()">Create Group</button>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- ============================================ -->
+  <!-- SERVICE CYCLE MODAL — NEW                    -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="serviceCycleModal">
+    <div class="modal-box" style="width: 400px;">
+      <div class="modal-header">
+        <h3>Service Cycle Dates</h3>
+        <button class="modal-close" onclick="closeModal('serviceCycleModal')">&times;</button>
+      </div>
+      <div class="modal-body">
+        <p style="font-size: 13px; color: #64748b; margin-bottom: 16px;">Please set the service start and end dates for
+          this lead to close it.</p>
+        <form id="serviceCycleForm">
+          <input type="hidden" id="serviceCycleLeadId">
+          <div class="form-group">
+            <label for="cycleStart">Service Start Date <span class="required">*</span></label>
+            <input type="date" id="cycleStart" required>
+          </div>
+          <div class="form-group">
+            <label for="cycleEnd">Service End Date <span class="required">*</span></label>
+            <input type="date" id="cycleEnd" required>
+          </div>
+          <div class="form-group">
+            <label for="convertService">Confirmed Service <span class="required">*</span></label>
+            <select id="convertService" required>
+              <option value="">Select Service</option>
+              <option value="Social Media">Social Media</option>
+              <option value="Performance Marketing">Performance Marketing</option>
+              <option value="SEO">SEO</option>
+              <option value="Website">Website</option>
+              <option value="Content">Content</option>
+              <option value="Other">Other</option>
+            </select>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn-ghost" onclick="closeModal('serviceCycleModal')">Cancel</button>
+        <button class="btn-primary" id="modalSaveServiceCycle" form="serviceCycleForm"
+          style="width: auto; margin-top: 0;">Save & Close Lead</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ============================================ -->
+  <!-- CLIENT PROFILE MODAL — NEW                  -->
+  <!-- ============================================ -->
+  <div class="modal-overlay" id="clientProfileModal">
+    <div class="modal-box" style="width: 500px;">
+      <div class="modal-header" style="border-bottom: none; padding-bottom: 0; align-items: flex-start;">
+        <div style="display: flex; flex-direction: column;">
+          <h3 id="profileCompanyName" style="font-size: 20px; font-weight: 800; color: #0f172a; margin: 0;">Company Name
+          </h3>
+        </div>
+        <div style="display: flex; gap: 8px;">
+          <div class="action-menu">
+            <button class="btn-menu" id="profileMenuBtn" onclick="window.clientHandlers.toggleProfileMenu(event)">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="1"></circle>
+                <circle cx="12" cy="5" r="1"></circle>
+                <circle cx="12" cy="19" r="1"></circle>
+              </svg>
+            </button>
+            <div id="clientProfileDropdown" class="dropdown-content" style="right: 0; top: 35px;">
+              <button class="dropdown-item" id="menuEditProfile" onclick="window.clientHandlers.enterEditMode()">✎ Edit
+                Profile</button>
+              <button class="dropdown-item" id="menuToggleStatus" onclick="">⏸ Pause Client</button>
+              <button class="dropdown-item delete" id="menuDeleteClient" onclick="">🗑 Delete Client</button>
+            </div>
+          </div>
+          <button class="modal-close" onclick="closeModal('clientProfileModal')"
+            style="margin-top: -4px;">&times;</button>
+        </div>
+      </div>
+
+      <div class="modal-body" style="padding-top: 10px;">
+        <!-- View Mode Container -->
+        <div id="profileViewMode">
+          <div class="profile-section-title">Client Details</div>
+          <div class="details-grid">
+            <div class="profile-item">
+              <span class="detail-label">Contact Name</span>
+              <div class="detail-value" id="profileViewClientName">--</div>
+            </div>
+            <div class="profile-item">
+              <span class="detail-label">Phone Number</span>
+              <div class="detail-value" id="profileViewPhone">--</div>
+            </div>
+            <div class="profile-item">
+              <span class="detail-label">Joining Date</span>
+              <div class="detail-value" id="profileViewJoinedDate" style="color: #64748b; font-weight: 500;">--</div>
+            </div>
+            <div class="profile-item">
+              <span class="detail-label">Location</span>
+              <div class="detail-value" id="profileViewLocation">--</div>
+            </div>
+            <div class="profile-item" id="profileReferralSection" style="display: none;">
+              <span class="detail-label">Referred By</span>
+              <div class="detail-value" id="profileViewReferral">--</div>
+            </div>
+          </div>
+
+          <div class="profile-section-title">Service Details</div>
+          <div id="profileViewServiceChips" class="chip-container"></div>
+
+          <div class="profile-section-title">Assigned Associate</div>
+          <div id="profileViewAssigneeChip" class="chip-container"></div>
+
+          <div class="profile-section-title">Cycle Dates</div>
+          <div id="profileViewDates"
+            style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9; font-size: 13px; font-weight: 600; color: #1e293b;">
+            --</div>
+
+          <div style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px;">
+            <div class="profile-section-title" style="margin: 0;">Internal Notes History</div>
+          </div>
+          <div id="profileNotesHistory"
+            style="font-size: 12px; color: #64748b; background: #f8fafc; padding: 10px; border-radius: 8px; border: 1px solid #f1f5f9; max-height: 150px; overflow-y: auto; margin-bottom: 12px; white-space: pre-wrap;">
+            No history available.</div>
+
+          <div class="profile-section-title" style="font-size: 11px; margin-bottom: 6px; color: #94a3b8;">Add New Note
+          </div>
+          <textarea id="profileNewNoteInput" class="modern-textarea" rows="2"
+            placeholder="Type a new note here... it will auto-save on close."
+            onblur="window.clientHandlers.autoSaveNotes()"
+            style="background: white; border: 1px solid #e2e8f0;"></textarea>
+        </div>
+
+        <!-- Edit Mode Container (Hidden by default) -->
+        <div id="profileEditMode" style="display: none;">
+          <div class="profile-section-title">Client Details (Editable)</div>
+          <div class="details-grid">
+            <div class="profile-item">
+              <span class="detail-label">Contact Name (Read-only)</span>
+              <div id="profileEditClientName" class="detail-value">--</div>
+            </div>
+            <div class="profile-item">
+              <span class="detail-label">Phone (Read-only)</span>
+              <div id="profileEditPhone" class="detail-value">--</div>
+            </div>
+            <div class="profile-item" style="grid-column: span 2;">
+              <label class="detail-label">Location</label>
+              <input type="text" id="profileLocationInput" class="modern-textarea" style="padding: 8px;"
+                placeholder="City, Country">
+            </div>
+          </div>
+
+          <div class="profile-section-title">Service Details</div>
+          <div id="profileEditServiceChips" class="chip-container"></div>
+
+          <div class="profile-section-title">Assigned Associate</div>
+          <div id="profileEditAssigneeChip" class="chip-container"></div>
+
+          <div class="profile-section-title">Dates</div>
+          <div style="background: #f8fafc; padding: 12px; border-radius: 12px; border: 1px solid #f1f5f9;">
+            <div class="compact-date-row">
+              <span style="width: 80px; font-weight: 500;">Cycle Start</span>
+              <input type="date" id="profileCycleStart">
+            </div>
+            <div class="compact-date-row">
+              <span style="width: 80px; font-weight: 500;">Cycle End</span>
+              <input type="date" id="profileCycleEnd">
+            </div>
+          </div>
+
+          <div class="profile-section-title">Internal Notes (Full History)</div>
+          <textarea id="profileNotes" class="modern-textarea" rows="4"
+            placeholder="Edit full history here..."></textarea>
+        </div>
+      </div>
+
+      <div class="modal-footer" style="border-top: none; padding-top: 0; min-height: 60px;">
+        <!-- View Mode Footer -->
+        <div id="profileViewFooter" style="display: flex; width: 100%; justify-content: flex-end;">
+        </div>
+
+        <!-- Edit Mode Footer -->
+        <div id="profileEditFooter" style="display: none; width: 100%; justify-content: flex-end; gap: 12px;">
+          <button class="btn-ghost" onclick="window.clientHandlers.cancelEdit()">Cancel</button>
+          <button id="btnSaveProfile" class="btn-primary"
+            style="margin-top: 0; width: auto; background: #0f172a; padding: 8px 24px; border-radius: 8px;">Save
+            Changes</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CALENDAR DAY DETAILS SLIDE-IN PANEL -->
+  <div class="modal-overlay" id="calendarDayModal">
+    <div class="modal-box" style="width: 420px; border-radius: 20px 0 0 20px;">
+      <div class="modal-header"
+        style="padding: 24px 32px; background: white; border-bottom: 1px solid #f1f5f9; display: block;">
+        <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 16px;">
+          <h3 id="calendarModalTitle"
+            style="font-size: 14px; font-weight: 800; color: var(--cal-text-muted); text-transform: uppercase; letter-spacing: 0.1em; margin: 0;">
+            Daily Schedule</h3>
+          <button class="modal-close" onclick="closeModal('calendarDayModal')"
+            style="margin-top: -8px; font-size: 24px;">&times;</button>
+        </div>
+        <h2 id="calendarModalSubtitle"
+          style="font-size: 28px; font-weight: 800; color: #0f172a; margin: 0; line-height: 1.2;"></h2>
+      </div>
+
+      <div class="modal-body" style="padding: 32px; background: #f8fafc; flex: 1; overflow-y: auto;">
+        <div id="taskList" style="display: flex; flex-direction: column; gap: 12px;">
+          <!-- Tasks loaded via JS -->
+        </div>
+
+        <div style="margin-top: 24px;">
+          <button class="btn-primary" id="btnShowCreateForm" onclick="window.calendarHandlers.showCreateForm()"
+            style="width: 100%; padding: 14px; background: white; border: 2px dashed #e2e8f0; color: #64748b; font-weight: 600; font-size: 14px; margin-top: 0; transition: all 0.2s; border-radius: 12px;">
+            + Add New Task
+          </button>
+        </div>
+
+        <!-- Hidden Create Form -->
+        <div id="taskCreateForm"
+          style="display: none; background: white; border-radius: 16px; border: 1px solid #e2e8f0; padding: 20px; margin-top: 24px; box-shadow: var(--shadow-lg);">
+          <div style="margin-bottom: 16px; display: flex; justify-content: space-between; align-items: center;">
+            <span style="font-weight: 700; font-size: 15px;">New Task</span>
+            <button class="btn-ghost" onclick="window.calendarHandlers.hideCreateForm()"
+              style="padding: 4px 10px; font-size: 11px;">Cancel</button>
+          </div>
+
+          <div id="modalClientSelectorGroup" style="display: none; margin-bottom: 16px;">
+            <label
+              style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block;">Client</label>
+            <select id="modalClientSelect" class="modern-textarea" style="padding: 10px; background: #f8fafc;"></select>
+          </div>
+
+          <div style="display: flex; flex-direction: column; gap: 16px;">
+            <div>
+              <label
+                style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 6px; display: block;">Description</label>
+              <input type="text" id="taskInput" class="modern-textarea" style="padding: 12px; font-size: 13px;"
+                placeholder="What needs to be done?">
+            </div>
+            <button id="btnSaveTask" class="btn-primary"
+              style="margin-top: 0; background: var(--cal-primary); font-weight: 700; padding: 12px;">Save Task</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  </div>
+
+  <!-- ===== COMING SOON MODAL ===== -->
+  <div class="modal-overlay" id="comingSoonModal">
+    <div class="modal-box" style="width: 400px; text-align: center; padding: 40px 32px;">
+      <div style="font-size: 48px; margin-bottom: 20px;">🚀</div>
+      <h3 id="comingSoonTitle" style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Coming
+        Soon</h3>
+      <p id="comingSoonMessage" style="font-size: 15px; color: #64748b; line-height: 1.6; margin-bottom: 28px;">
+        This feature is under development and will be available soon.
+      </p>
+      <button class="btn-primary" onclick="window.closeAllModals()"
+        style="width: 100%; height: 46px; font-size: 15px; font-weight: 600;">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Small Selector Popover -->
+  <div id="popoverSelector"
+    style="display: none; position: fixed; z-index: 10001; background: white; border: 1px solid #e2e8f0; border-radius: 12px; box-shadow: 0 10px 25px -5px rgba(0,0,0,0.1); width: 180px; padding: 8px;">
+    <div id="popoverContent" style="max-height: 200px; overflow-y: auto;"></div>
+  </div>
+
+  <!-- EMPLOYEE TASKS MODAL -->
+  <div class="modal-overlay" id="employeeTasksModal">
+    <div class="modal-box" style="width: 500px;">
+      <div class="modal-header">
+        <h3 id="employeeTasksModalTitle">Associate Tasks</h3>
+        <button class="modal-close" onclick="closeModal('employeeTasksModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="employeeTasksList" style="padding: 0;">
+      </div>
+      <div class="modal-footer">
+        <button class="btn-ghost" onclick="closeModal('employeeTasksModal')">Close</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Supabase + App (Unified) -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <style>
+    .profile-section h4 {
+      font-size: 12px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      color: #64748b;
+      margin-bottom: 12px;
+      border-bottom: 1px solid #f1f5f9;
+      padding-bottom: 4px;
+    }
+
+    #clientProfileModal.is-editing #menuEditProfile {
+      display: none !important;
+    }
+
+    .task-dot {
+      width: 6px;
+      height: 6px;
+      background: #3b82f6;
+      border-radius: 50%;
+      margin: 2px auto 0;
+    }
+
+    .date-number {
+      font-weight: 600;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .profile-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    .profile-item label {
+      display: block;
+      font-size: 11px;
+      color: #94a3b8;
+      margin-bottom: 2px;
+    }
+
+    .profile-item span {
+      font-size: 14px;
+      font-weight: 500;
+      color: #334155;
+    }
+  </style>
+
+
+  <!-- ADD ASSOCIATE MODAL -->
+  <div class="modal-overlay" id="addEmployeeModal">
+    <div class="modal-box" style="width: 450px;">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">Register New Associate</h3>
+        <button class="modal-close" onclick="closeModal('addEmployeeModal')">&times;</button>
+      </div>
+      <form id="addEmployeeForm" onsubmit="window.employeeHandlers.saveEmployee(event)">
+        <div class="modal-body" style="padding: 24px;">
+          <div class="form-group">
+            <label for="empFullName">Full Name <span class="required">*</span></label>
+            <input type="text" id="empFullName" name="full_name" required placeholder="Enter full name">
+          </div>
+          <div class="form-group">
+            <label for="empEmail">Email Address <span class="required">*</span></label>
+            <input type="email" id="empEmail" name="email" required placeholder="Enter email address">
+          </div>
+          <div class="form-group">
+            <label for="empTeam">Department / Team</label>
+            <select id="empTeam" name="team">
+              <option value="">None / Unassigned</option>
+              <option value="HR Department">HR Department</option>
+              <option value="Social Media Department">Social Media Department</option>
+              <option value="Content Department">Content Department</option>
+              <option value="Designer Department">Designer Department</option>
+              <option value="SEO Department">SEO Department</option>
+              <option value="Performance Marketing Department">Performance Marketing Department</option>
+              <option value="Production Department">Production Department</option>
+              <option value="Sales Department">Sales Department</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="empDesignation">Designation</label>
+            <input type="text" id="empDesignation" name="designation" placeholder="e.g. Senior SEO Executive">
+          </div>
+          <div class="form-group">
+            <label for="empRole">System Role</label>
+            <select id="empRole" name="role">
+              <option value="associate">Associate</option>
+              <option value="manager">Manager</option>
+              <option value="ceo">CEO</option>
+            </select>
+          </div>
+          <p style="font-size: 11px; color: #64748b; margin-top: 12px; font-style: italic;">
+            Note: Default password will be 'leadXkochi'. Associate can change it after login.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" onclick="closeModal('addEmployeeModal')">Cancel</button>
+          <button type="submit" class="btn-primary" style="margin-top:0; width: auto; padding: 10px 24px;">Register
+            Associate</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT EMPLOYEE MODAL -->
+  <div class="modal-overlay" id="editEmployeeModal">
+    <div class="modal-box" style="width: 450px;">
+      <div class="modal-header">
+        <h3 style="font-size: 18px; font-weight: 700; color: #1e293b;">Edit Associate Profile</h3>
+        <button class="modal-close" onclick="closeModal('editEmployeeModal')">&times;</button>
+      </div>
+      <form id="editEmployeeForm" onsubmit="window.employeeHandlers.saveProfileUpdate(event)">
+        <div class="modal-body" style="padding: 24px;">
+          <input type="hidden" id="editEmpId" name="id">
+          <div class="form-group">
+            <label for="editFullName">Full Name</label>
+            <input type="text" id="editFullName" name="full_name" required>
+          </div>
+          <div class="form-group">
+            <label for="editTeam">Department / Team</label>
+            <select id="editTeam" name="team">
+              <option value="">None / Unassigned</option>
+              <option value="HR Department">HR Department</option>
+              <option value="Social Media Department">Social Media Department</option>
+              <option value="Content Department">Content Department</option>
+              <option value="Designer Department">Designer Department</option>
+              <option value="SEO Department">SEO Department</option>
+              <option value="Performance Marketing Department">Performance Marketing Department</option>
+              <option value="Production Department">Production Department</option>
+              <option value="Sales Department">Sales Department</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="editDesignation">Designation</label>
+            <input type="text" id="editDesignation" name="designation">
+          </div>
+          <div class="form-group">
+            <label for="editRole">System Role</label>
+            <select id="editRole" name="role">
+              <option value="associate">Associate</option>
+              <option value="manager">Manager</option>
+              <option value="ceo">CEO</option>
+            </select>
+          </div>
+          <p style="font-size: 12px; color: #64748b; margin-top: 12px; font-style: italic;">
+            Note: Changing roles will update system permissions immediately.
+          </p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ghost" onclick="closeModal('editEmployeeModal')">Cancel</button>
+          <button type="submit" class="btn-primary" style="margin-top:0; width: auto; padding: 10px 24px;">Save
+            Changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script type="module">
+    console.log("INLINE MODULE LOADER STARTING...");
+    import { initApp } from './src/app_v5.js?v=header_v4';
+    initApp().catch(err => {
+      console.error("CRITICAL BOOT ERROR:", err);
+    });
+  </script>
+  <div class="modal-overlay" id="dateTaskModal">
+    <div class="modal-box" style="width: 450px;">
+      <div class="modal-header">
+        <h3 id="dateTaskTitle" style="font-size: 18px; font-weight: 700; color: #1e293b;">Tasks for --</h3>
+        <button class="modal-close" onclick="closeModal('dateTaskModal')">&times;</button>
+      </div>
+      <div class="modal-body" id="dateTasksBody" style="max-height: 400px; overflow-y: auto; padding: 0;">
+        <!-- Tasks will be listed here -->
+      </div>
+      <div class="modal-footer">
+        <button id="btnAddTaskFromDate" class="btn-primary" style="width: 100%; margin-top: 0;">+ Add Task</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Legacy script removed to prevent DOM reference errors -->
+
+  <!-- ===== COMING SOON MODAL ===== -->
+  <div class="modal-overlay" id="comingSoonModal">
+    <div class="modal-box" style="width: 400px; text-align: center; padding: 40px 32px;">
+      <div style="font-size: 48px; margin-bottom: 20px;">🚀</div>
+      <h3 id="comingSoonTitle" style="font-size: 24px; font-weight: 700; color: #1e293b; margin-bottom: 12px;">Coming
+        Soon</h3>
+      <p id="comingSoonMessage" style="font-size: 15px; color: #64748b; line-height: 1.6; margin-bottom: 28px;">
+        This feature is under development and will be available soon.
+      </p>
+      <button class="btn-primary" onclick="window.closeAllModals()"
+        style="width: 100%; height: 46px; font-size: 15px; font-weight: 600;">Got it!</button>
+    </div>
+  </div>
+
+  <!-- Toast Notification Container -->
+  <div id="toastContainer"
+    style="position: fixed; bottom: 24px; right: 24px; z-index: 10002; display: flex; flex-direction: column; gap: 10px;">
+  </div>
+
+  <!-- ===== CONFIRMATION MODAL ===== -->
+  <div class="modal-overlay" id="confirmModal">
+    <div class="modal-box" style="width: 400px; padding: 32px; text-align: center;">
+      <div id="confirmIcon" style="font-size: 48px; margin-bottom: 20px; color: #f59e0b;">⚠️</div>
+      <h3 id="confirmTitle" style="font-size: 20px; font-weight: 700; color: #0f172a; margin-bottom: 12px;">Confirm
+        Action</h3>
+      <p id="confirmMessage" style="font-size: 15px; color: #64748b; line-height: 1.6; margin-bottom: 28px;">Are you
+        sure you want to proceed with this action?</p>
+      <div style="display: flex; gap: 12px; justify-content: center;">
+        <button class="btn-ghost" onclick="closeModal('confirmModal')" style="min-width: 120px;">Cancel</button>
+        <button class="btn-primary" id="confirmBtn"
+          style="min-width: 120px; background: #ef4444; border-color: #ef4444; margin: 0;">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>

@@ -1,0 +1,158 @@
+LEADX CRM - CODEBASE AND ARCHITECTURE REPORT
+================================================
+
+1. ARCHITECTURAL OVERVIEW
+-------------------------
+LeadX CRM is a multi-tenant client relationship management system built with a modern decoupled architecture.
+
+- Frontend: Single Page Application (SPA) using Vanilla HTML5, CSS3 (Inter font), and Modern JavaScript (ES Modules).
+- Backend: Supabase (PostgreSQL, Auth, Storage, Edge Functions).
+- Communication: Direct client-side integration with Supabase via CDN-loaded JS SDK.
+- State Management: Centralized "Store" pattern (store_v2.js) for application-wide reactive data.
+- Styling: Custom design system (leadx_v5.css) emphasizing visual clarity, responsive layouts, and premium aesthetics.
+
+2. DATABASE SCHEMA (Supabase PostgreSQL)
+---------------------------------------
+The system uses a relational schema with Row Level Security (RLS) for data isolation.
+
+Table: organizations
+- id (UUID, PK)
+- name (TEXT)
+- created_at (TIMESTAMPTZ)
+
+Table: profiles (Extends auth.users)
+- id (UUID, PK, FK to auth.users)
+- organization_id (UUID, FK to organizations)
+- full_name (TEXT)
+- role (TEXT: admin, employee, team_lead, manager, director)
+- team (TEXT)
+- created_at (TIMESTAMPTZ)
+
+Table: leads (Prospective Clients)
+- id (UUID, PK)
+- organization_id (UUID, FK)
+- user_id (UUID, FK - Creator)
+- assigned_to (UUID, FK - Owner)
+- name (TEXT)
+- company_name (TEXT)
+- phone (TEXT)
+- email (TEXT)
+- source (TEXT)
+- service_interest (TEXT)
+- budget (TEXT)
+- referral_name (TEXT)
+- status (TEXT: new, contacted, meeting, proposal, closed)
+- notes (TEXT)
+- created_at (TIMESTAMPTZ)
+
+Table: clients (Converted Leads)
+- id (UUID, PK)
+- lead_id (UUID, FK)
+- organization_id (UUID, FK)
+- company_name (TEXT)
+- client_name (TEXT)
+- phone (TEXT)
+- service (TEXT)
+- location (TEXT)
+- notes (TEXT)
+- status (TEXT: active, paused)
+- cycle_start_date (DATE)
+- cycle_end_date (DATE)
+- assigned_to (UUID, FK to profiles)
+- created_at (TIMESTAMPTZ)
+
+Table: tasks (Kanban)
+- id (UUID, PK)
+- organization_id (UUID, FK)
+- created_by (UUID, FK)
+- client_id (UUID, FK to clients)
+- title (TEXT)
+- description (TEXT)
+- status (TEXT: todo, in_progress, completed)
+- priority (TEXT: low, medium, high)
+- due_date (DATE)
+- task_type (TEXT)
+- created_at (TIMESTAMPTZ)
+
+Table: subtasks
+- id (UUID, PK)
+- task_id (UUID, FK)
+- title (TEXT)
+- is_completed (BOOLEAN)
+- created_at (TIMESTAMPTZ)
+
+3. CORE CODEBASE FILES
+----------------------
+
+--- FILE: index.html (UI Structure) ---
+- Contains the main navigation (Sidebar), Header, and view containers.
+- Implements modular view switching using `id="[viewName]View"`.
+- Contains all modal definitions (Add Lead, Client Profile, Task Modal, etc.).
+- Loads Supabase and modular JS via `<script type="module">`.
+
+--- FILE: leadx_v5.css (Design System) ---
+- Modern reset and typography (Inter).
+- CSS Variables for color tokens (pending full migration to :root).
+- Flexible grid systems for Stats Bar, Kanban Board, and Client Cards.
+- Modal overlay/box animation system.
+- Role-based visibility classes (.admin-only-feature).
+
+--- FILE: src/app_v5.js (Entry Point) ---
+- Orchestrates the sequential initialization of all modules.
+- Handles global auth check and dev-mode fallbacks.
+- Exposes `initApp` and `switchView` to the window object.
+
+--- FILE: src/state/store_v2.js (State Management) ---
+- Centralized `store` object.
+- Repositories for leads, clients, tasks, and associates.
+- Reactive filter states for each module.
+- Role helper methods (`isAdmin()`, `isSuperAdmin()`).
+
+--- FILE: src/config/supabase.js (Backend Bridge) ---
+- Initializes `supabaseClient`.
+- Provides a centralized `handleSupabaseError` utility.
+
+--- FILE: src/modules/leads_v2.js (Leads Engine) ---
+- Handles Lead CRUD operations.
+- Implements table rendering with search/filter logic.
+- Managed Lead-to-Client conversion logic with "Service Cycle" modal.
+- Recent Fix: Conditional Referral Field (show/hide based on source).
+
+--- FILE: src/modules/clients_v2.js (Clients Engine) ---
+- Implements the "Client Profile" modal with view/edit modes.
+- Handles service cycle rollover logic (auto-updates dates).
+- Recent Fix: Displays referral information from linked lead.
+
+--- FILE: src/modules/tasks_v2.js (Kanban Engine) ---
+- Full drag-and-drop Kanban board implementation.
+- Filterable by Client (required to view tasks).
+- Subtask management within the task modal.
+
+--- FILE: src/modules/ui_v2.js (View Controller) ---
+- Master `switchView` function for navigation.
+- Managed modal state (ensures isolation).
+- Global event listeners for UI interactions (Esc key, clicks outside modals).
+
+4. SECURITY MODEL
+-----------------
+- Row Level Security (RLS) is enabled on all core tables.
+- A helper function `get_my_org()` ensures users only see data belonging to their organization.
+- Policies are defined for SELECT, INSERT, UPDATE, and DELETE based on `auth.uid()` and `organization_id`.
+
+5. RECENT REFINEMENTS
+---------------------
+- Leads Table: Referral column removed; Company column standardized to name-only.
+- Add Lead Form: Dynamic referral name field appearing only for "Referral" source.
+- Client Profile: "Referred By" section added to show origin data.
+- UI: Unified modal closing and view switching to prevent DOM conflicts.
+
+6. RECOMMENDATIONS FOR NEW UI GENERATION
+----------------------------------------
+- Maintain the modular JS structure for easy logic migration.
+- Use the existing Supabase client and store for data consistency.
+- The new UI should preserve the existing DOM IDs to avoid breaking JS event listeners.
+- Leverage the .view-container pattern for smooth navigation transitions.
+- Consider a component-based approach (e.g., React/Vue) if the vanilla complexity grows, though current logic is highly optimized for performance.
+
+================================================
+END OF REPORT

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Login — LEAD 360</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="leadx_v5.css?v=final_fix">
+</head>
+<body class="auth-page">
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <div class="auth-header">
+        <div class="logo">LEAD</div>
+        <div class="logo-sub">360</div>
+        <h1>Welcome back</h1>
+        <p>Sign in to manage your leads</p>
+      </div>
+
+      <form id="loginForm" class="auth-form">
+        <div class="form-group">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" required>
+        </div>
+
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Enter your password" required>
+        </div>
+
+        <div class="form-group" id="errorMsg" style="display: none;">
+          <div class="error-box"></div>
+        </div>
+
+        <button type="submit" class="btn-primary">Sign In</button>
+      </form>
+
+      <!-- No signup option needed as employees are added internally -->
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
+  <script type="module">
+    import { supabaseClient } from './src/config/supabase.js';
+
+    // Redirect if already logged in
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+      if (session) window.location.href = 'index.html';
+    });
+
+    document.getElementById('loginForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = document.getElementById('email').value;
+      const password = document.getElementById('password').value;
+      const errorBox = document.querySelector('.error-box');
+
+      const { data, error } = await supabaseClient.auth.signInWithPassword({
+        email,
+        password
+      });
+
+      if (error) {
+        errorBox.textContent = error.message;
+        document.getElementById('errorMsg').style.display = 'block';
+        return;
+      }
+
+      // Check if account status is inactive
+      try {
+        const { data: profile } = await supabaseClient
+          .from('profiles')
+          .select('status')
+          .eq('id', data.user.id)
+          .single();
+
+        if (profile && profile.status === 'inactive') {
+          await supabaseClient.auth.signOut();
+          errorBox.textContent = "Your account has been deactivated. Please contact the administrator.";
+          document.getElementById('errorMsg').style.display = 'block';
+          return;
+        }
+      } catch (err) {
+        console.error("Profile check failed:", err);
+      }
+
+      window.location.href = 'index.html';
+    });
+  </script>
+</body>
+</html>
