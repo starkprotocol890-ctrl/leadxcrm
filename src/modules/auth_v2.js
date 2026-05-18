@@ -20,16 +20,6 @@ export async function checkAuth() {
 
   console.log("[Auth] Session debug:", { user, session, userError, sessionError });
 
-  // Check for test user override in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  const testUserId = urlParams.get('test_user_id');
-
-  if (testUserId) {
-    console.log("[Auth] Test user override found:", testUserId);
-    await loadCurrentUser(testUserId);
-    return { user: { id: testUserId, email: "test@bypass.com" } };
-  }
-
   if (user) {
     console.log("[Auth] User authenticated:", user.email);
     store.currentUserId = user.id;
@@ -37,7 +27,7 @@ export async function checkAuth() {
     return session || { user };
   }
 
-  // No session found and no override: user is not authenticated
+  // No session found: user is not authenticated
   console.warn("[Auth] No session found.");
   return null;
 }
@@ -56,38 +46,39 @@ export async function loadCurrentUser(userId) {
       .single();
 
     if (error || !data) {
-      console.warn("[Auth] Profile load failed, picking first available profile as fallback", error);
-      const { data: firstProfile } = await supabaseClient.from("profiles").select("*").limit(1).single();
-      if (firstProfile) {
-        store.currentUser = firstProfile;
-      } else {
-        // Absolute fallback
-        store.currentUser = { full_name: "Azad Muhammed", role: "super_admin" };
-      }
-    } else {
-      store.currentUser = data;
-      if (data && data.status === 'inactive') {
-        alert("Your account has been deactivated. Please contact the administrator.");
-        await logout();
-        throw new Error("Deactivated account blocked.");
-      }
+      console.error("[Auth] Profile load failed for user:", userId, error);
+      // Clean up local store and reject unauthenticated load
+      store.currentUser = null;
+      store.currentUserId = null;
+      store.currentUserRole = null;
+      store.currentOrganizationId = null;
+      throw new Error("Profile load failed: No profile found for this user.");
     }
 
-    // PART 4 — Normalize role
-    store.currentUser.role = (store.currentUser.role || "admin").toLowerCase().trim();
+    store.currentUser = data;
+    if (data.status === 'inactive') {
+      alert("Your account has been deactivated. Please contact the administrator.");
+      await logout();
+      throw new Error("Deactivated account blocked.");
+    }
+
+    // Normalize role
+    store.currentUser.role = (store.currentUser.role || "associate").toLowerCase().trim();
     store.currentUserRole = store.currentUser.role;
     store.currentOrganizationId = store.currentUser.organization_id;
 
-    console.log("[Auth] Current User loaded:", store.currentUser);
+    console.log("[Auth] Current User loaded successfully:", store.currentUser);
 
     applyRoleUI();
     renderUserHeader();
   } catch (err) {
     console.error("[Auth] Fatal error in loadCurrentUser:", err);
-    // Continue anyway
-    store.currentUser = store.currentUser || { full_name: "Dev User", role: "admin" };
-    applyRoleUI();
-    renderUserHeader();
+    // Ensure state cleanup and session logout
+    store.currentUser = null;
+    store.currentUserId = null;
+    store.currentUserRole = null;
+    store.currentOrganizationId = null;
+    await logout();
   }
 }
 
@@ -179,33 +170,7 @@ export async function logout() {
   }
 }
 
-/**
- * Ensures user belongs to an organization (legacy check if needed)
- */
-export async function ensureOrganization() {
-  if (store.currentOrganizationId) return;
 
-  const { data: orgs, error } = await supabaseClient.from("organizations").select("*");
-  if (error) return;
-
-  if (orgs && orgs.length > 0) {
-    store.currentOrganizationId = orgs[0].id;
-  } else {
-    const { data: newOrg } = await supabaseClient
-      .from("organizations")
-      .insert([{ name: "My CRM Organization" }])
-      .select()
-      .single();
-    if (newOrg) store.currentOrganizationId = newOrg.id;
-  }
-
-  if (store.currentOrganizationId) {
-    await supabaseClient
-      .from("profiles")
-      .update({ organization_id: store.currentOrganizationId })
-      .eq("id", store.currentUserId);
-  }
-}
 
 /**
  * PART 11 — PROFILE MANAGEMENT
