@@ -37,43 +37,8 @@ export async function checkAuth() {
     return session || { user };
   }
 
-  // FALLBACK DEV MODE: If no session, try to find "Azad Muhammed" or first user
-  console.warn("[Auth] No session found. Attempting FALLBACK DEV MODE...");
-
-  try {
-    const { data: fallbackProfiles, error: fbError } = await supabaseClient
-      .from("profiles")
-      .select("*")
-      .limit(5); // Fetch a few to find the best match
-
-    if (fbError) throw fbError;
-
-    let fbUser = null;
-    if (fallbackProfiles && fallbackProfiles.length > 0) {
-      // Priority 1: Azad Muhammed
-      fbUser = fallbackProfiles.find(p => (p.full_name || "").toLowerCase().includes("azad"));
-      // Priority 2: Any super admin
-      if (!fbUser) fbUser = fallbackProfiles.find(p => p.role === "super_admin");
-      // Priority 3: First one
-      if (!fbUser) fbUser = fallbackProfiles[0];
-    }
-
-    if (fbUser) {
-      console.log("[Auth] Fallback user found:", fbUser.full_name);
-      store.currentUser = fbUser;
-      store.currentUserId = fbUser.id;
-      store.currentUserRole = fbUser.role;
-      store.currentOrganizationId = fbUser.organization_id;
-
-      applyRoleUI();
-      renderUserHeader();
-      return { user: { id: fbUser.id, email: "dev@fallback.com" } };
-    }
-  } catch (fbErr) {
-    console.error("[Auth] Fallback search failed:", fbErr);
-  }
-
-  console.error("[Auth] All auth methods failed.");
+  // No session found and no override: user is not authenticated
+  console.warn("[Auth] No session found.");
   return null;
 }
 

@@ -32,11 +32,9 @@ export async function initApp() {
     console.log("[Main] Current User in store:", store.currentUser);
 
     if (!session) {
-      console.warn("[Main] No session found, but CONTINUING in dev mode...");
-      // Ensure we have some sort of currentUser to avoid downstream crashes
-      if (!store.currentUser) {
-        store.currentUser = { email: "starkprotocol890@gmail.com", id: "95290cb0-f010-4fa6-b48d-6fb5a49d22d8", full_name: "Stark Protocol (Admin)", role: "super_admin" };
-      }
+      console.warn("[Main] No session found, redirecting to login...");
+      window.location.replace("login.html");
+      return;
     }
 
     // 3. Sequential Data Load (Robust)
