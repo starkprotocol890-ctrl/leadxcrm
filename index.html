@@ -14,11 +14,11 @@
   <script>console.log("HEAD SCRIPTS EXECUTING...");</script>
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js"></script>
   <script>console.log("SUPABASE CDN LOADED:", typeof supabase !== 'undefined');</script>
-  <link rel="stylesheet" href="leadx_v5.css?v=header_v2">
+  <link rel="stylesheet" href="leadx_v5.css?v=session_isolation_v5">
   <script>console.log("INDEX.HTML VERSION: v5.1 (HEADER REFIX)");</script>
 </head>
 
-<body>
+<body style="display: none;">
 
   <!-- ===== HEADER ===== -->
   <header class="header">
@@ -1773,7 +1773,7 @@
 
   <script type="module">
     console.log("INLINE MODULE LOADER STARTING...");
-    import { initApp } from './src/app_v5.js?v=header_v4';
+    import { initApp } from './src/app_v5.js?v=session_isolation_v5';
     initApp().catch(err => {
       console.error("CRITICAL BOOT ERROR:", err);
     });

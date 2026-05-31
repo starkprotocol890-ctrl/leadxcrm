@@ -45,7 +45,12 @@ http.createServer((req, res) => {
         res.end(`Server error: ${error.code}`);
       }
     } else {
-      res.writeHead(200, { 'Content-Type': contentType, 'Cache-Control': 'no-cache' });
+      res.writeHead(200, { 
+        'Content-Type': contentType, 
+        'Cache-Control': 'no-cache, no-store, must-revalidate',
+        'Pragma': 'no-cache',
+        'Expires': '0'
+      });
       res.end(content, 'utf-8');
     }
   });

@@ -1,4 +1,4 @@
-import { supabaseClient } from '../config/supabase.js';
+import { supabaseClient, SUPABASE_URL, SUPABASE_ANON_KEY } from '../config/supabase.js';
 import { store } from '../state/store_v2.js';
 import { escapeHtml, formatUserRole } from '../utils/appUtils.js';
 
@@ -169,8 +169,17 @@ window.employeeHandlers = {
     try {
       console.log("[Associates] Registering new user in Auth...");
 
-      // 1. Create Auth User
-      const { data: authData, error: authError } = await supabaseClient.auth.signUp({
+      // 1. Create a temporary client that doesn't persist the session to sessionStorage
+      const tempClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: {
+          persistSession: false,
+          autoRefreshToken: false,
+          detectSessionInUrl: false
+        }
+      });
+
+      // 2. Create Auth User using the temporary client
+      const { data: authData, error: authError } = await tempClient.auth.signUp({
         email: payload.email,
         password: 'leadXkochi',
         options: {

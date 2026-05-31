@@ -1,7 +1,7 @@
 import { supabaseClient } from '../config/supabase.js';
 import { store } from '../state/store_v2.js';
 import { escapeHtml } from '../utils/appUtils.js';
-import { computeNotifications } from './notifications_v2.js?v=header_v2';
+import { computeNotifications } from './notifications_v2.js?v=session_isolation_v5';
 
 /**
  * TASKS MODULE — KANBAN BOARD
